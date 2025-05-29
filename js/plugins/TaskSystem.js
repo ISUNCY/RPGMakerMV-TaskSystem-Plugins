@@ -165,11 +165,9 @@ Window_TaskList.prototype.calculateItemHeight = function(task) {
     // const contentHeight = Math.min(contentLines.length, 4) * lineHeight; // 最多显示4行
     const contentHeight = contentLines.length * lineHeight;
 
-    // 奖励高度
-    const rewardHeight = lineHeight;
 
     // 总高度 = 上下padding + 标题高度 + 内容高度 + 奖励高度
-    return padding * 2 + titleHeight + contentHeight + rewardHeight;
+    return padding * 2 + titleHeight + contentHeight + lineHeight;
 };
 
 // 获取每个任务项的矩形区域（考虑滚动位置）
