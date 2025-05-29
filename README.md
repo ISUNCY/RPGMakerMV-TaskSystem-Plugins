@@ -3,11 +3,11 @@
 本插件为 RPG Maker MV 提供简单易用的任务管理功能，支持任务列表展示、任务添加与完成控制，以及任务未完成时的行进限制等操作。
 
 ## 二、效果展示
-![img.png](img.png)
-![img_1.png](img_1.png)
-![img_2.png](img_2.png)
-![img_3.png](img_3.png)
-![img_4.png](img_4.png)
+![ReadMeImg/img.png](ReadMeImg/img.png)
+![ReadMeImg/img_1.png](ReadMeImg/img_1.png)
+![ReadMeImg/img_2.png](ReadMeImg/img_2.png)
+![ReadMeImg/img_3.png](ReadMeImg/img_3.png)
+![ReadMeImg/img_4.png](ReadMeImg/img_4.png)
 
 ## 三、核心功能
 - **任务状态可视化**：实时显示任务列表及完成进度，支持窗口折叠/展开。
