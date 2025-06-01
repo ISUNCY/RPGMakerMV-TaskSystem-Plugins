@@ -241,7 +241,7 @@ Window_TaskList.prototype.drawItem = function(index) {
     this.drawTextEx(`\\C[24]${task.key}`, rect.x + padding, rect.y + padding);
 
     // 绘制任务内容（中间）
-    const contentWidth = rect.width - 50;
+    const contentWidth = rect.width-50;
     const contentY = rect.y + padding + lineHeight;
     const contentLines = this.wrapText(task.value.context, contentWidth);
 
@@ -264,7 +264,7 @@ Window_TaskList.prototype.drawItem = function(index) {
     }
 };
 
-// 改进的文本自动换行逻辑
+// 文本自动换行逻辑
 Window_TaskList.prototype.wrapText = function(text, maxWidth) {
     if (!text || !maxWidth) return [];
     const lines = [];
@@ -412,19 +412,21 @@ Window_TaskList.prototype.refreshContents = function() {
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
 
+    let tempCmds = new abc.CommandUtils([]);
+
+    let REUSABLE = tempCmds.ReusableType.REUSABLE;
+    let NON_REUSABLE = tempCmds.ReusableType.NON_REUSABLE;
+
     /**
      * 添加主线任务详情
      */
     if (command === 'AddMainTask') {
-        //解析参数
-        const argsResult = abc.CommandUtils.parseCommandArgs(args);
+         let cmds = new abc.CommandUtils(args);
 
-        console.log("解析到参数：" + JSON.stringify(argsResult));
-
-        const taskName = argsResult['n'] || argsResult['name'] || argsResult['任务名称'];
-        const taskContext = argsResult['c'] || argsResult['context'] || argsResult['任务内容'];
-        const taskReward = argsResult['r'] || argsResult['reward'] || argsResult['奖励内容'] || argsResult['奖励介绍'];
-
+        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
+        const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
+        console.log(taskContext);
         if (taskName && taskContext && taskReward) {
             const fullTaskName = '[主线]' + taskName;
             if ($gameSystem.getTaskData(fullTaskName)) {
@@ -449,13 +451,18 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 完成任务，并获得奖励
      */
     if (command === 'FinishTask') {
-        const argsResult = abc.CommandUtils.parseCommandArgs(args);
-        const taskName = argsResult['n'] || argsResult['name'] || argsResult['任务名称'];
-        const goldReward = argsResult['g'] || argsResult['gold'] || argsResult['金币'];
-        const itemReward = argsResult['i'] || argsResult['item'] || argsResult['物品'];
-        const weaponReward = argsResult['w'] || argsResult['weapon'] || argsResult['武器'];
-        const armorReward = argsResult['a'] || argsResult['armor'] || argsResult['护甲'];
+        let cmds = new abc.CommandUtils(args);
+        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        const goldReward = cmds.getCmds(['g','gold','金币'], NON_REUSABLE, 1);
+        const itemReward = cmds.getCmds(['i', 'item', '物品'], REUSABLE, 2);
+        const weaponReward = cmds.getCmds(['w', 'weapon', '武器'], REUSABLE, 2);
+        const armorReward = cmds.getCmds(['a', 'armor', '护甲'], REUSABLE, 2);
 
+        console.log('reward');
+        console.log(goldReward);
+        console.log(itemReward);
+        console.log(weaponReward);
+        console.log(armorReward);
 
         if (taskName) {
             let taskData = $gameSystem.getTaskData('[主线]'+taskName);
@@ -466,23 +473,32 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             }
             if (taskData) {
                 $gameMessage.add(`完成任务: \\C[24]${taskName}\\C[0]\n获得奖励: \\C[20]${taskData.reward}`);
-                if (goldReward !== undefined && !isNaN(goldReward)) {
+                if (goldReward !== undefined && isNaN(goldReward)) {
                     $gameParty.gainGold(parseInt(goldReward));
                 }
                 if (itemReward) {
-                    const itemId = parseInt(itemReward[0]);
-                    const itemCount = parseInt(itemReward[1]) || 1;
-                    $gameParty.gainItem($dataItems[itemId], itemCount);
+                    for (let i = 0; i < itemReward.length; i++) {
+                        let item = itemReward[i];
+                        const itemId = parseInt(item[0]);
+                        const itemCount = parseInt(item[1]) || 1;
+                        $gameParty.gainItem($dataItems[itemId], itemCount);
+                    }
                 }
                 if (weaponReward) {
-                    const weaponId = parseInt(weaponReward[0]);
-                    const weaponCount = parseInt(weaponReward[1]) || 1;
-                    $gameParty.gainItem($dataWeapons[weaponId], weaponCount);
+                    for (let i = 0; i < weaponReward.length; i++) {
+                        let weapon = weaponReward[i];
+                        const weaponId = parseInt(weapon[0]);
+                        const weaponCount = parseInt(weapon[1]) || 1;
+                        $gameParty.gainItem($dataWeapons[weaponId], weaponCount);
+                    }
                 }
                 if (armorReward) {
-                    const armorId = parseInt(armorReward[0]);
-                    const armorCount = parseInt(armorReward[1]) || 1;
-                    $gameParty.gainItem($dataArmors[armorId], armorCount);
+                    for (let i = 0; i < armorReward.length; i++) {
+                        let armor = armorReward[i];
+                        const armorId = parseInt(armor[0]);
+                        const armorCount = parseInt(armor[1]) || 1;
+                        $gameParty.gainItem($dataArmors[armorId], armorCount);
+                    }
                 }
                 $gameSystem.deleteTask(fullTaskName);
                 if (SceneManager._scene && SceneManager._scene._taskWindow) {
@@ -499,11 +515,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      */
     if (command === 'AddNormalTask') {
 
-        const commandArgs = abc.CommandUtils.parseCommandArgs(args);
-
-        const taskName = commandArgs['n'] || commandArgs['name'] || commandArgs['任务名称'];
-        const taskContext = commandArgs['c'] || commandArgs['context'] || commandArgs['任务内容'];
-        const taskReward = commandArgs['r'] || commandArgs['reward'] || commandArgs['奖励内容'] || commandArgs['奖励介绍'];
+        const cmds = new abc.CommandUtils(args);
+        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
+        const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
 
         if (taskName && taskContext && taskReward) {
             const fullTaskName = '[支线]' + taskName;
@@ -537,8 +552,10 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 如果任务未完成，则阻止玩家到达指定方格
      */
     if (command === 'RefuseIfNotFinish') {
-        const commandArgs = abc.CommandUtils.parseCommandArgs(args);
-        const taskName = commandArgs['n'] || commandArgs['name'] || commandArgs['任务名称'];
+
+        const cmds = new abc.CommandUtils(args);
+        const taskName = cmds.getCmds(['default', 'n', 'name', '任务名称'], NON_REUSABLE, 1);
+
         if (taskName) {
             let taskData = $gameSystem.getTaskData('[主线]'+taskName);
             if (!taskData) {
@@ -558,50 +575,152 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 };
 
 //命令处理工具类
-abc.CommandUtils = {
-    parseCommandArgs: function(args) {
-        const result = {};
-        let currentKey = null;
 
-        for (let i = 0; i < args.length; i++) {
-            const arg = args[i];
-            if (arg.startsWith('/')) {
-                // 新的参数键
-                currentKey = arg.slice(1);
-                result[currentKey] = [];
-            } else if (currentKey) {
-                // 添加值到当前键
-                if (arg.startsWith('"')) {
-                    // 处理带引号的参数（可能包含空格）
-                    let quotedValue = arg.slice(1);
-                    while (i < args.length - 1 && !args[i].endsWith('"')) {
-                        i++;
-                        quotedValue += " " + args[i];
-                    }
-                    // 移除结尾引号（如果有）
-                    if (quotedValue.endsWith('"')) {
-                        quotedValue = quotedValue.slice(0, -1);
-                    }
-                    result[currentKey].push(quotedValue);
-                } else {
-                    result[currentKey].push(arg);
-                }
-            } else {
-                // 没有键，可能是任务名称
-                if (!result['n']) {
-                    result['n'] = [];
-                }
-                result['n'].push(arg);
-            }
-        }
-
-        // 简化单值数组
-        for (const key in result) {
-            if (result[key].length === 1) {
-                result[key] = result[key][0];
-            }
-        }
-
-        return result;
+abc.cmd = function() {
+    this.number = 0;
+    this.args = [];
+    this.addCmdNumber = function () {
+        this.number++;
+        this.args.push([])
     }
+    this.getCmdNumber = function () {
+        return this.number;
+    }
+    this.getArgs = function (index) {
+        return this.args[index]
+    }
+    this.addArg = function (index, arg) {
+        this.args[index].push(arg);
+    }
+}
+
+abc.CommandUtils = function (args){
+    this.ReusableType = {
+        REUSABLE : "可重复",
+        NON_REUSABLE : "不可重复"
+    }
+
+    this.parseArgs = function (args) {
+        let cmds = {};
+        let currentPos = 0;
+        let currentKey = 'default'
+        cmds[currentKey] = new abc.cmd(currentKey);
+        cmds[currentKey].addCmdNumber();
+        while (currentPos !== args.length) {
+            let arg = args[currentPos];
+            if (arg.startsWith('/')) {
+                currentKey = arg.slice(1);
+                if (cmds[currentKey]) {
+                    cmds[currentKey].addCmdNumber();
+                }
+                else {
+                    cmds[currentKey] = new abc.cmd(currentKey);
+                    cmds[currentKey].addCmdNumber();
+                }
+            }
+            else {
+                if (arg.startsWith('"')) {
+                    let str = arg.slice(1);
+                    while (currentPos+1 < args.length && !args[currentPos].endsWith('"')) {
+                        str += " " + args[++currentPos];
+                    }
+                    str = str.slice(0,-1);
+                    cmds[currentKey].addArg(cmds[currentKey].number-1, str);
+                }
+                else {
+                    cmds[currentKey].addArg(cmds[currentKey].number-1, arg);
+                }
+            }
+            currentPos++;
+        }
+        console.log(cmds);
+        return cmds;
+
+    }
+
+    this.cmds = this.parseArgs(args);
+
+    this.getCmds = function (keys, reusableType, argCount) {
+        let cmd = new abc.cmd();
+        let haveCmd = false;
+        // console.log(keys);
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            // console.log(key);
+            if (this.cmds[key]) {
+                // console.log(this.cmds[key]);
+                haveCmd = true;
+                for (let j = 0; j < this.cmds[key].args.length; j++) {
+                    let args = this.cmds[key].args[j];
+                    cmd.addCmdNumber();
+                    let count = 0;
+                    for (let k = 0; k < args.length; k++) {
+                        let arg = args[k];
+                        cmd.addArg(cmd.getCmdNumber()-1, arg);
+                        count++;
+                        if (argCount === count) break;
+                    }
+                    if (argCount === 1) {
+                        cmd.args[cmd.getCmdNumber()-1] = cmd.args[cmd.getCmdNumber()-1][0];
+                    }
+                }
+                if (reusableType === this.ReusableType.NON_REUSABLE) {
+                    console.log("test");
+                    console.log(cmd.args);
+                    cmd.args = cmd.args[0];
+                    break;
+                }
+            }
+        }
+        if (!haveCmd) return null;
+        console.log("args:");
+        console.log(cmd.args);
+        return cmd.args;
+    }
+
+    // parseCommandArgs: function(args) {
+    //     const result = {};
+    //     let currentKey = null;
+    //
+    //     for (let i = 0; i < args.length; i++) {
+    //         const arg = args[i];
+    //         if (arg.startsWith('/')) {
+    //             // 新的参数键
+    //             currentKey = arg.slice(1);
+    //             result[currentKey] = [];
+    //         } else if (currentKey) {
+    //             // 添加值到当前键
+    //             if (arg.startsWith('"')) {
+    //                 // 处理带引号的参数（可能包含空格）
+    //                 let quotedValue = arg.slice(1);
+    //                 while (i < args.length - 1 && !args[i].endsWith('"')) {
+    //                     i++;
+    //                     quotedValue += " " + args[i];
+    //                 }
+    //                 // 移除结尾引号（如果有）
+    //                 if (quotedValue.endsWith('"')) {
+    //                     quotedValue = quotedValue.slice(0, -1);
+    //                 }
+    //                 result[currentKey].push(quotedValue);
+    //             } else {
+    //                 result[currentKey].push(arg);
+    //             }
+    //         } else {
+    //             // 没有键，可能是任务名称
+    //             if (!result['n']) {
+    //                 result['n'] = [];
+    //             }
+    //             result['n'].push(arg);
+    //         }
+    //     }
+    //
+    //     // 简化单值数组
+    //     for (const key in result) {
+    //         if (result[key].length === 1) {
+    //             result[key] = result[key][0];
+    //         }
+    //     }
+    //
+    //     return result;
+    // }
 };
