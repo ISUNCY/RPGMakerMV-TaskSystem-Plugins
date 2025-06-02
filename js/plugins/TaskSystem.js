@@ -1,5 +1,5 @@
 /*:
- * @plugindesc 任务系统插件（支持滚动及底部提示）
+ * @plugindesc 任务系统插件
  *
  * @author Isuncy
  *
@@ -41,9 +41,9 @@
  * - 当窗口未滚动到底部时，底部会显示倒三角提示
  */
 
-var abc = abc || {};
+var isuncy = isuncy || {};
 
-abc.Parameters = PluginManager.parameters('TaskSystem');
+isuncy.Parameters = PluginManager.parameters('TaskSystem');
 
 var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
 
@@ -412,21 +412,24 @@ Window_TaskList.prototype.refreshContents = function() {
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
     _Game_Interpreter_pluginCommand.call(this, command, args);
 
-    let tempCmds = new abc.CommandUtils([]);
-
-    let REUSABLE = tempCmds.ReusableType.REUSABLE;
-    let NON_REUSABLE = tempCmds.ReusableType.NON_REUSABLE;
-
     /**
      * 添加主线任务详情
      */
     if (command === 'AddMainTask') {
-         let cmds = new abc.CommandUtils(args);
+        //  let cmds = new isuncy.CommandUtils(args);
+        //
+        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        // const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
+        // const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
+        // console.log(taskContext);
+        let parser = new commandParser(args);
+        const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
+        const taskContext = parser.getCommand(['c','context','任务内容'], {reusable: false, maxCount:1}).first;
+        const taskReward = parser.getCommand(['r','reward','奖励内容', "奖励介绍"], {reusable: false, maxCount:1}).first;
 
-        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
-        const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
-        console.log(taskContext);
+        console.log(taskName);
+        console.log('test');
+
         if (taskName && taskContext && taskReward) {
             const fullTaskName = '[主线]' + taskName;
             if ($gameSystem.getTaskData(fullTaskName)) {
@@ -451,18 +454,27 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 完成任务，并获得奖励
      */
     if (command === 'FinishTask') {
-        let cmds = new abc.CommandUtils(args);
-        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        const goldReward = cmds.getCmds(['g','gold','金币'], NON_REUSABLE, 1);
-        const itemReward = cmds.getCmds(['i', 'item', '物品'], REUSABLE, 2);
-        const weaponReward = cmds.getCmds(['w', 'weapon', '武器'], REUSABLE, 2);
-        const armorReward = cmds.getCmds(['a', 'armor', '护甲'], REUSABLE, 2);
+        // let cmds = new isuncy.CommandUtils(args);
+        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        // const goldReward = cmds.getCmds(['g','gold','金币'], NON_REUSABLE, 1);
+        // const itemReward = cmds.getCmds(['i', 'item', '物品'], REUSABLE, 2);
+        // const weaponReward = cmds.getCmds(['w', 'weapon', '武器'], REUSABLE, 2);
+        // const armorReward = cmds.getCmds(['a', 'armor', '护甲'], REUSABLE, 2);
 
-        console.log('reward');
-        console.log(goldReward);
-        console.log(itemReward);
-        console.log(weaponReward);
-        console.log(armorReward);
+        let parser = new commandParser(args);
+        const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
+        const goldReward = parser.getCommand(['g','gold','金币'], {reusable: false, maxCount: 1}).first;
+        const itemReward = parser.getCommand(['i', 'item', '物品'], {reusable: true, maxCount: 2}).all;
+        const weaponReward = parser.getCommand(['w', 'weapon', '武器'], {reusable: true, maxCount: 2}).all;
+        const armorReward = parser.getCommand(['a', 'armor', '护甲'], {reusable: true, maxCount: 2}).all;
+
+        //
+        //
+        // console.log('reward');
+        // console.log(goldReward);
+        // console.log(itemReward);
+        // console.log(weaponReward);
+        // console.log(armorReward);
 
         if (taskName) {
             let taskData = $gameSystem.getTaskData('[主线]'+taskName);
@@ -515,10 +527,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      */
     if (command === 'AddNormalTask') {
 
-        const cmds = new abc.CommandUtils(args);
-        const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
-        const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
+        // const cmds = new isuncy.CommandUtils(args);
+        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
+        // const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
+        // const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
+
+        let parser = new commandParser(args);
+        const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
+        const taskContext = parser.getCommand(['c','context','任务内容'], {reusable: false, maxCount:1}).first;
+        const taskReward = parser.getCommand(['r','reward','奖励内容', "奖励介绍"], {reusable: false, maxCount:1}).first;
 
         if (taskName && taskContext && taskReward) {
             const fullTaskName = '[支线]' + taskName;
@@ -553,8 +570,11 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      */
     if (command === 'RefuseIfNotFinish') {
 
-        const cmds = new abc.CommandUtils(args);
-        const taskName = cmds.getCmds(['default', 'n', 'name', '任务名称'], NON_REUSABLE, 1);
+        // const cmds = new isuncy.CommandUtils(args);
+        // const taskName = cmds.getCmds(['default', 'n', 'name', '任务名称'], NON_REUSABLE, 1);
+
+        let parser = new commandParser(args);
+        const taskName = parser.getCommand(['default','n','name','任务名称'], {reusable: false, maxCount: 1}).first;
 
         if (taskName) {
             let taskData = $gameSystem.getTaskData('[主线]'+taskName);
@@ -574,109 +594,183 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
     }
 };
 
-//命令处理工具类
 
-abc.cmd = function() {
-    this.number = 0;
-    this.args = [];
-    this.addCmdNumber = function () {
-        this.number++;
-        this.args.push([])
+//命令处理工具类（上版写的一言难尽 重构一下）
+class commandParser {
+    constructor(args) {
+        this.commands = this._parser(args);
     }
-    this.getCmdNumber = function () {
-        return this.number;
+
+    _parser(args) {
+        let commands = {"default":[[]]};
+        let inQuote = false;
+        let current = 'default';
+        let buffer = '';
+        for (let arg of args) {
+            if (arg.startsWith('/') && !inQuote) {
+                current = arg.slice(1);
+                commands[current] = commands[current] || [];
+                commands[current].push([]);
+                continue;
+            }
+            for (let i = 0; i < arg.length; i++) {
+                if (arg[i] === '"') {
+                    inQuote = !inQuote;
+                    if (inQuote === false) break;
+                    continue;
+                }
+                buffer += arg[i];
+            }
+            if (!inQuote) {
+                commands[current][commands[current].length-1].push(buffer);
+                buffer = "";
+            }
+            else {
+                buffer += " ";
+            }
+        }
+        console.log(commands);
+        return commands;
     }
-    this.getArgs = function (index) {
-        return this.args[index]
-    }
-    this.addArg = function (index, arg) {
-        this.args[index].push(arg);
+
+    getCommand(keys, options) {
+        const {
+            reusable = false,
+            maxCount = Infinity
+        } = options;
+        let result = [];
+        for (let key of keys) {
+            if (this.commands[key]) {
+                result.push(...this.commands[key].slice(0,maxCount));
+            }
+        }
+        return new commandResult(result, !reusable);
     }
 }
 
-abc.CommandUtils = function (args){
-    this.ReusableType = {
-        REUSABLE : "可重复",
-        NON_REUSABLE : "不可重复"
+class commandResult {
+    constructor(args, isSingle) {
+        this.isSingle = isSingle;
+        this.args = args;
     }
-
-    this.parseArgs = function (args) {
-        let cmds = {};
-        let currentPos = 0;
-        let currentKey = 'default'
-        cmds[currentKey] = new abc.cmd(currentKey);
-        cmds[currentKey].addCmdNumber();
-        while (currentPos !== args.length) {
-            let arg = args[currentPos];
-            if (arg.startsWith('/')) {
-                currentKey = arg.slice(1);
-                if (cmds[currentKey]) {
-                    cmds[currentKey].addCmdNumber();
-                }
-                else {
-                    cmds[currentKey] = new abc.cmd(currentKey);
-                    cmds[currentKey].addCmdNumber();
-                }
-            }
-            else {
-                if (arg.startsWith('"')) {
-                    let str = arg.slice(1);
-                    while (currentPos+1 < args.length && !args[currentPos].endsWith('"')) {
-                        str += " " + args[++currentPos];
-                    }
-                    str = str.slice(0,-1);
-                    cmds[currentKey].addArg(cmds[currentKey].number-1, str);
-                }
-                else {
-                    cmds[currentKey].addArg(cmds[currentKey].number-1, arg);
-                }
-            }
-            currentPos++;
+    get all () {
+        if (this.args.length === 0) return null;
+        return this.isSingle ? [this.args[0]] : this.args;
+    }
+    get first () {
+        if (this.args.length === 0) return null;
+        if (this.args[0].length > 0) {
+            return this.isSingle ? this.args[0][0]||null : null;
         }
-        console.log(cmds);
-        return cmds;
-
+        return null;
     }
+}
 
-    this.cmds = this.parseArgs(args);
+//
 
-    this.getCmds = function (keys, reusableType, argCount) {
-        let cmd = new abc.cmd();
-        let haveCmd = false;
-        // console.log(keys);
-        for (let i = 0; i < keys.length; i++) {
-            let key = keys[i];
-            // console.log(key);
-            if (this.cmds[key]) {
-                // console.log(this.cmds[key]);
-                haveCmd = true;
-                for (let j = 0; j < this.cmds[key].args.length; j++) {
-                    let args = this.cmds[key].args[j];
-                    cmd.addCmdNumber();
-                    let count = 0;
-                    for (let k = 0; k < args.length; k++) {
-                        let arg = args[k];
-                        cmd.addArg(cmd.getCmdNumber()-1, arg);
-                        count++;
-                        if (argCount === count) break;
-                    }
-                    if (argCount === 1) {
-                        cmd.args[cmd.getCmdNumber()-1] = cmd.args[cmd.getCmdNumber()-1][0];
-                    }
-                }
-                if (reusableType === this.ReusableType.NON_REUSABLE) {
-                    console.log("test");
-                    console.log(cmd.args);
-                    cmd.args = cmd.args[0];
-                    break;
-                }
-            }
-        }
-        if (!haveCmd) return null;
-        console.log("args:");
-        console.log(cmd.args);
-        return cmd.args;
-    }
+// //命令处理工具类
+//
+// isuncy.cmd = function() {
+//     this.number = 0;
+//     this.args = [];
+//     this.addCmdNumber = function () {
+//         this.number++;
+//         this.args.push([])
+//     }
+//     this.getCmdNumber = function () {
+//         return this.number;
+//     }
+//     this.getArgs = function (index) {
+//         return this.args[index]
+//     }
+//     this.addArg = function (index, arg) {
+//         this.args[index].push(arg);
+//     }
+// }
+//
+// isuncy.CommandUtils = function (args){
+//     this.ReusableType = {
+//         REUSABLE : "可重复",
+//         NON_REUSABLE : "不可重复"
+//     }
+//
+//     this.parseArgs = function (args) {
+//         let cmds = {};
+//         let currentPos = 0;
+//         let currentKey = 'default'
+//         cmds[currentKey] = new isuncy.cmd(currentKey);
+//         cmds[currentKey].addCmdNumber();
+//         while (currentPos !== args.length) {
+//             let arg = args[currentPos];
+//             if (arg.startsWith('/')) {
+//                 currentKey = arg.slice(1);
+//                 if (cmds[currentKey]) {
+//                     cmds[currentKey].addCmdNumber();
+//                 }
+//                 else {
+//                     cmds[currentKey] = new isuncy.cmd(currentKey);
+//                     cmds[currentKey].addCmdNumber();
+//                 }
+//             }
+//             else {
+//                 if (arg.startsWith('"')) {
+//                     let str = arg.slice(1);
+//                     while (currentPos+1 < args.length && !args[currentPos].endsWith('"')) {
+//                         str += " " + args[++currentPos];
+//                     }
+//                     str = str.slice(0,-1);
+//                     cmds[currentKey].addArg(cmds[currentKey].number-1, str);
+//                 }
+//                 else {
+//                     cmds[currentKey].addArg(cmds[currentKey].number-1, arg);
+//                 }
+//             }
+//             currentPos++;
+//         }
+//         console.log(cmds);
+//         return cmds;
+//
+//     }
+//
+//     this.cmds = this.parseArgs(args);
+//
+//     this.getCmds = function (keys, reusableType, argCount) {
+//         let cmd = new isuncy.cmd();
+//         let haveCmd = false;
+//         // console.log(keys);
+//         for (let i = 0; i < keys.length; i++) {
+//             let key = keys[i];
+//             // console.log(key);
+//             if (this.cmds[key]) {
+//                 // console.log(this.cmds[key]);
+//                 haveCmd = true;
+//                 for (let j = 0; j < this.cmds[key].args.length; j++) {
+//                     let args = this.cmds[key].args[j];
+//                     cmd.addCmdNumber();
+//                     let count = 0;
+//                     for (let k = 0; k < args.length; k++) {
+//                         let arg = args[k];
+//                         cmd.addArg(cmd.getCmdNumber()-1, arg);
+//                         count++;
+//                         if (argCount === count) break;
+//                     }
+//                     if (argCount === 1) {
+//                         cmd.args[cmd.getCmdNumber()-1] = cmd.args[cmd.getCmdNumber()-1][0];
+//                     }
+//                 }
+//                 if (reusableType === this.ReusableType.NON_REUSABLE) {
+//                     console.log("test");
+//                     console.log(cmd.args);
+//                     cmd.args = cmd.args[0];
+//                     break;
+//                 }
+//             }
+//         }
+//         if (!haveCmd) return null;
+//         console.log("args:");
+//         console.log(cmd.args);
+//         return cmd.args;
+//     }
 
     // parseCommandArgs: function(args) {
     //     const result = {};
@@ -723,4 +817,4 @@ abc.CommandUtils = function (args){
     //
     //     return result;
     // }
-};
+// };
