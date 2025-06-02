@@ -416,12 +416,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 添加主线任务详情
      */
     if (command === 'AddMainTask') {
-        //  let cmds = new isuncy.CommandUtils(args);
-        //
-        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        // const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
-        // const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
-        // console.log(taskContext);
+
         let parser = new commandParser(args);
         const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
         const taskContext = parser.getCommand(['c','context','任务内容'], {reusable: false, maxCount:1}).first;
@@ -454,12 +449,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 完成任务，并获得奖励
      */
     if (command === 'FinishTask') {
-        // let cmds = new isuncy.CommandUtils(args);
-        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        // const goldReward = cmds.getCmds(['g','gold','金币'], NON_REUSABLE, 1);
-        // const itemReward = cmds.getCmds(['i', 'item', '物品'], REUSABLE, 2);
-        // const weaponReward = cmds.getCmds(['w', 'weapon', '武器'], REUSABLE, 2);
-        // const armorReward = cmds.getCmds(['a', 'armor', '护甲'], REUSABLE, 2);
 
         let parser = new commandParser(args);
         const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
@@ -467,14 +456,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         const itemReward = parser.getCommand(['i', 'item', '物品'], {reusable: true, maxCount: 2}).all;
         const weaponReward = parser.getCommand(['w', 'weapon', '武器'], {reusable: true, maxCount: 2}).all;
         const armorReward = parser.getCommand(['a', 'armor', '护甲'], {reusable: true, maxCount: 2}).all;
-
-        //
-        //
-        // console.log('reward');
-        // console.log(goldReward);
-        // console.log(itemReward);
-        // console.log(weaponReward);
-        // console.log(armorReward);
 
         if (taskName) {
             let taskData = $gameSystem.getTaskData('[主线]'+taskName);
@@ -526,12 +507,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      * 添加支线任务详情
      */
     if (command === 'AddNormalTask') {
-
-        // const cmds = new isuncy.CommandUtils(args);
-        // const taskName = cmds.getCmds(['n','name','任务名称'], NON_REUSABLE, 1);
-        // const taskContext = cmds.getCmds(['c','context','任务内容'], NON_REUSABLE, 1);
-        // const taskReward = cmds.getCmds(['r','reward','奖励内容', "奖励介绍"], NON_REUSABLE, 1);
-
         let parser = new commandParser(args);
         const taskName = parser.getCommand(['n','name','任务名称'], {reusable: false, maxCount: 1}).first;
         const taskContext = parser.getCommand(['c','context','任务内容'], {reusable: false, maxCount:1}).first;
@@ -666,8 +641,6 @@ class commandResult {
     }
 }
 
-//
-
 // //命令处理工具类
 //
 // isuncy.cmd = function() {
@@ -771,7 +744,6 @@ class commandResult {
 //         console.log(cmd.args);
 //         return cmd.args;
 //     }
-
     // parseCommandArgs: function(args) {
     //     const result = {};
     //     let currentKey = null;
