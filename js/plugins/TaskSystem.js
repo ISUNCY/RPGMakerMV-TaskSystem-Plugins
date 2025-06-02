@@ -545,9 +545,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
      */
     if (command === 'RefuseIfNotFinish') {
 
-        // const cmds = new isuncy.CommandUtils(args);
-        // const taskName = cmds.getCmds(['default', 'n', 'name', '任务名称'], NON_REUSABLE, 1);
-
         let parser = new commandParser(args);
         const taskName = parser.getCommand(['default','n','name','任务名称'], {reusable: false, maxCount: 1}).first;
 
@@ -604,7 +601,6 @@ class commandParser {
                 buffer += " ";
             }
         }
-        console.log(commands);
         return commands;
     }
 
@@ -640,153 +636,3 @@ class commandResult {
         return null;
     }
 }
-
-// //命令处理工具类
-//
-// isuncy.cmd = function() {
-//     this.number = 0;
-//     this.args = [];
-//     this.addCmdNumber = function () {
-//         this.number++;
-//         this.args.push([])
-//     }
-//     this.getCmdNumber = function () {
-//         return this.number;
-//     }
-//     this.getArgs = function (index) {
-//         return this.args[index]
-//     }
-//     this.addArg = function (index, arg) {
-//         this.args[index].push(arg);
-//     }
-// }
-//
-// isuncy.CommandUtils = function (args){
-//     this.ReusableType = {
-//         REUSABLE : "可重复",
-//         NON_REUSABLE : "不可重复"
-//     }
-//
-//     this.parseArgs = function (args) {
-//         let cmds = {};
-//         let currentPos = 0;
-//         let currentKey = 'default'
-//         cmds[currentKey] = new isuncy.cmd(currentKey);
-//         cmds[currentKey].addCmdNumber();
-//         while (currentPos !== args.length) {
-//             let arg = args[currentPos];
-//             if (arg.startsWith('/')) {
-//                 currentKey = arg.slice(1);
-//                 if (cmds[currentKey]) {
-//                     cmds[currentKey].addCmdNumber();
-//                 }
-//                 else {
-//                     cmds[currentKey] = new isuncy.cmd(currentKey);
-//                     cmds[currentKey].addCmdNumber();
-//                 }
-//             }
-//             else {
-//                 if (arg.startsWith('"')) {
-//                     let str = arg.slice(1);
-//                     while (currentPos+1 < args.length && !args[currentPos].endsWith('"')) {
-//                         str += " " + args[++currentPos];
-//                     }
-//                     str = str.slice(0,-1);
-//                     cmds[currentKey].addArg(cmds[currentKey].number-1, str);
-//                 }
-//                 else {
-//                     cmds[currentKey].addArg(cmds[currentKey].number-1, arg);
-//                 }
-//             }
-//             currentPos++;
-//         }
-//         console.log(cmds);
-//         return cmds;
-//
-//     }
-//
-//     this.cmds = this.parseArgs(args);
-//
-//     this.getCmds = function (keys, reusableType, argCount) {
-//         let cmd = new isuncy.cmd();
-//         let haveCmd = false;
-//         // console.log(keys);
-//         for (let i = 0; i < keys.length; i++) {
-//             let key = keys[i];
-//             // console.log(key);
-//             if (this.cmds[key]) {
-//                 // console.log(this.cmds[key]);
-//                 haveCmd = true;
-//                 for (let j = 0; j < this.cmds[key].args.length; j++) {
-//                     let args = this.cmds[key].args[j];
-//                     cmd.addCmdNumber();
-//                     let count = 0;
-//                     for (let k = 0; k < args.length; k++) {
-//                         let arg = args[k];
-//                         cmd.addArg(cmd.getCmdNumber()-1, arg);
-//                         count++;
-//                         if (argCount === count) break;
-//                     }
-//                     if (argCount === 1) {
-//                         cmd.args[cmd.getCmdNumber()-1] = cmd.args[cmd.getCmdNumber()-1][0];
-//                     }
-//                 }
-//                 if (reusableType === this.ReusableType.NON_REUSABLE) {
-//                     console.log("test");
-//                     console.log(cmd.args);
-//                     cmd.args = cmd.args[0];
-//                     break;
-//                 }
-//             }
-//         }
-//         if (!haveCmd) return null;
-//         console.log("args:");
-//         console.log(cmd.args);
-//         return cmd.args;
-//     }
-    // parseCommandArgs: function(args) {
-    //     const result = {};
-    //     let currentKey = null;
-    //
-    //     for (let i = 0; i < args.length; i++) {
-    //         const arg = args[i];
-    //         if (arg.startsWith('/')) {
-    //             // 新的参数键
-    //             currentKey = arg.slice(1);
-    //             result[currentKey] = [];
-    //         } else if (currentKey) {
-    //             // 添加值到当前键
-    //             if (arg.startsWith('"')) {
-    //                 // 处理带引号的参数（可能包含空格）
-    //                 let quotedValue = arg.slice(1);
-    //                 while (i < args.length - 1 && !args[i].endsWith('"')) {
-    //                     i++;
-    //                     quotedValue += " " + args[i];
-    //                 }
-    //                 // 移除结尾引号（如果有）
-    //                 if (quotedValue.endsWith('"')) {
-    //                     quotedValue = quotedValue.slice(0, -1);
-    //                 }
-    //                 result[currentKey].push(quotedValue);
-    //             } else {
-    //                 result[currentKey].push(arg);
-    //             }
-    //         } else {
-    //             // 没有键，可能是任务名称
-    //             if (!result['n']) {
-    //                 result['n'] = [];
-    //             }
-    //             result['n'].push(arg);
-    //         }
-    //     }
-    //
-    //     // 简化单值数组
-    //     for (const key in result) {
-    //         if (result[key].length === 1) {
-    //             result[key] = result[key][0];
-    //         }
-    //     }
-    //
-    //     return result;
-    // }
-// };
